@@ -59,11 +59,12 @@ double energy(frame s)
   return sqrt(sum/(double)N);
 }
 
-int
-main (int argc, char *argv[])
+int main (int argc, char *argv[])
 {
   FILE *input;
   frame s;
+  double rms[NB_MAX_FRAME] = {0.0};
+  int i = 0;
 
   if (argc != 2)
     {
@@ -78,10 +79,14 @@ main (int argc, char *argv[])
 
   while (sound_file_read (input, s))
     {
-	  /* a completer */
+      rms[i] = energy(s);
+      i++;
+      printf("%f\n", energy(s));
     }
 
-  	  /* a completer */
+    gnuplot_resetplot(h);
+    gnuplot_plot_x(h, rms, N/10, "RMS");
+    sleep(10);
 
   exit (EXIT_SUCCESS);
 }
