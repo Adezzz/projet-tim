@@ -4,8 +4,8 @@
 
 CC = gcc
 CFLAGS = -O3 -I. -Wall -lm
-SRC_DIR = ./src/
-LIB_DIR = ./lib/
+SRC_DIR = src/
+LIB_DIR = lib/
 
 #--------------------------------
 # LIBRARY SOURCES
@@ -26,8 +26,8 @@ ton :  $(LIB_DIR)midifile.c $(SRC_DIR)ton.c
 rythme : $(LIB_OBJ) $(LIB_SRC) $(SRC_DIR)rythme.c
 	$(CC) $(CFLAGS) $(LIB_OBJ) $(SRC_DIR)rythme.c -o rythme -lsndfile  -lvorbis -lvorbisenc -logg -lFLAC -lm -lfftw3
 
-similar : $(LIB_OBJ) $(LIB_SIMI) $(SRC_DIR)sim_mfcc.c
-	$(CC) $(CFLAGS) $(LIB_OBJ) $(SRC_DIR)sim_mfcc.c -o similar_mfcc -L./ -lsndfile  -lvorbis -lvorbisenc -logg -lFLAC -lm -lfftw3
+similar : $(LIB_SIMI) $(SRC_DIR)sim_mfcc.c
+	$(CC) $(CFLAGS) $(LIB_SIMI) $(LIB_SRC) $(SRC_DIR)sim_mfcc.c -o similar -L./ -lsndfile  -lvorbis -lvorbisenc -logg -lFLAC -lm -lfftw3
 
 clean :
 	rm -f *.o *.wav *.raw
