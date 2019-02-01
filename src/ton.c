@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "midifile.h"
+#include "../lib/midifile.h"
 
 void read_midi(char * midifile);
 
@@ -36,11 +36,30 @@ void correlation(int *hist, int *res, double *base_hist_maj, double *base_hist_m
 }
 
 
+const char *get_filename_ext(const char *filename) {
+    const char *dot = strrchr(filename, '.');
+    if(!dot || dot == filename) return "";
+    return dot + 1;
+}
+
+
 int main (int argc, char *argv[])
 {
-  read_midi(argv[1]);
 
+  //Check if file passed as argument
+  if (argc < 2) {
+    printf("usage: ./ton <midi_file>\n");
+    return EXIT_SUCCESS;
+  }
+  //Check if file is MIDI
+  if (strcmp("mid",get_filename_ext(argv[1])) != 0) {
+    printf("Error: expected MIDI file, got %s file.\n",get_filename_ext(argv[1]));
+    return EXIT_FAILURE;
+  }
+
+  read_midi(argv[1]);
 }
+
 
 void read_midi(char * midifile)
 {

@@ -7,6 +7,7 @@
 /*
  * Data Types
  */
+int r;
 
 struct MidiFile
 {
@@ -128,7 +129,7 @@ static signed short interpret_int16(unsigned char *buffer)
 static signed short read_int16(FILE *in)
 {
 	unsigned char buffer[2];
-	fread(buffer, 1, 2, in);
+	r = fread(buffer, 1, 2, in);
 	return interpret_int16(buffer);
 }
 
@@ -148,7 +149,7 @@ static unsigned short interpret_uint16(unsigned char *buffer)
 static unsigned short read_uint16(FILE *in)
 {
 	unsigned char buffer[2];
-	fread(buffer, 1, 2, in);
+	r = fread(buffer, 1, 2, in);
 	return interpret_uint16(buffer);
 }
 
@@ -168,7 +169,7 @@ static unsigned long interpret_uint32(unsigned char *buffer)
 static unsigned long read_uint32(FILE *in)
 {
 	unsigned char buffer[4];
-	fread(buffer, 1, 4, in);
+	r = fread(buffer, 1, 4, in);
 	return interpret_uint32(buffer);
 }
 
@@ -330,6 +331,8 @@ static void free_events_in_track(MidiFileTrack_t track)
 				free(event->u.meta.data_buffer);
 				break;
 			}
+			default:
+				break;
 		}
 
 		free(event);
@@ -350,7 +353,7 @@ MidiFile_t MidiFile_load(char *filename)
 
 	if ((filename == NULL) || ((in = fopen(filename, "rb")) == NULL)) return NULL;
 
-	fread(chunk_id, 1, 4, in);
+	r = fread(chunk_id, 1, 4, in);
 	chunk_size = read_uint32(in);
 	chunk_start = ftell(in);
 
@@ -358,7 +361,7 @@ MidiFile_t MidiFile_load(char *filename)
 
 	if (memcmp(chunk_id, "RIFF", 4) == 0)
 	{
-		fread(chunk_id, 1, 4, in); /* technically this one is a type id rather than a chunk id, but we'll reuse the buffer anyway */
+		r = fread(chunk_id, 1, 4, in); /* technically this one is a type id rather than a chunk id, but we'll reuse the buffer anyway */
 
 		if (memcmp(chunk_id, "RMID", 4) != 0)
 		{
@@ -366,7 +369,7 @@ MidiFile_t MidiFile_load(char *filename)
 			return NULL;
 		}
 
-		fread(chunk_id, 1, 4, in);
+		r = fread(chunk_id, 1, 4, in);
 		chunk_size = read_uint32(in);
 
 		if (memcmp(chunk_id, "data", 4) != 0)
@@ -375,7 +378,7 @@ MidiFile_t MidiFile_load(char *filename)
 			return NULL;
 		}
 
-		fread(chunk_id, 1, 4, in);
+		r = fread(chunk_id, 1, 4, in);
 		chunk_size = read_uint32(in);
 		chunk_start = ftell(in);
 	}
@@ -388,7 +391,7 @@ MidiFile_t MidiFile_load(char *filename)
 
 	file_format = read_uint16(in);
 	number_of_tracks = read_uint16(in);
-	fread(division_type_and_resolution, 1, 2, in);
+	r = fread(division_type_and_resolution, 1, 2, in);
 
 	switch ((signed char)(division_type_and_resolution[0]))
 	{
@@ -424,7 +427,7 @@ MidiFile_t MidiFile_load(char *filename)
 
 	while (number_of_tracks_read < number_of_tracks)
 	{
-		fread(chunk_id, 1, 4, in);
+		r = fread(chunk_id, 1, 4, in);
 		chunk_size = read_uint32(in);
 		chunk_start = ftell(in);
 
@@ -518,7 +521,7 @@ MidiFile_t MidiFile_load(char *filename)
 								int data_length = read_variable_length_quantity(in) + 1;
 								unsigned char *data_buffer = malloc(data_length);
 								data_buffer[0] = status;
-								fread(data_buffer + 1, 1, data_length - 1, in);
+								r = fread(data_buffer + 1, 1, data_length - 1, in);
 								MidiFileTrack_createSysexEvent(track, tick, data_length, data_buffer);
 								free(data_buffer);
 								break;
@@ -528,7 +531,7 @@ MidiFile_t MidiFile_load(char *filename)
 								int number = fgetc(in);
 								int data_length = read_variable_length_quantity(in);
 								unsigned char *data_buffer = malloc(data_length);
-								fread(data_buffer, 1, data_length, in);
+								r = fread(data_buffer, 1, data_length, in);
 
 								if (number == 0x2F)
 								{
@@ -604,6 +607,8 @@ int MidiFile_save(MidiFile_t midi_file, const char* filename)
 			fputc(MidiFile_getResolution(midi_file), out);
 			break;
 		}
+		default:
+			break;
 	}
 
 	for (track = MidiFile_getFirstTrack(midi_file); track != NULL; track = MidiFileTrack_getNextTrack(track))
@@ -694,6 +699,8 @@ int MidiFile_save(MidiFile_t midi_file, const char* filename)
 					fwrite(data, 1, data_length, out);
 					break;
 				}
+				default:
+					break;
 			}
 
 			previous_tick = tick;
@@ -1060,7 +1067,7 @@ int MidiFileTrack_delete(MidiFileTrack_t track)
 	{
 		(subsequent_track->number)--;
 	}
-	
+
 	(track->midi_file->number_of_tracks)--;
 
 	if (track->previous_track == NULL)
@@ -1410,6 +1417,8 @@ int MidiFileEvent_delete(MidiFileEvent_t event)
 			free(event->u.meta.data_buffer);
 			break;
 		}
+		default:
+			break;
 	}
 
 	free(event);
@@ -2218,4 +2227,3 @@ int MidiFileVoiceEvent_setData(MidiFileEvent_t event, unsigned long data)
 		}
 	}
 }
-

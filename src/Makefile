@@ -1,7 +1,7 @@
 #  -----------------------------------------------------------------------------
-#
+# 
 #                      GNU General Public Licence
-#
+#           
 #       This program is free software; you can redistribute it and/or
 #       modify it under the terms of the GNU General Public License as
 #       published by the Free Software Foundation; either version 2 of
@@ -24,24 +24,25 @@
 # GENERAL VARIABLES
 #--------------------------------
 
-CC = gcc
+CC = gcc 
 CFLAGS = -O3 -I. -Wall -lm #-pg -g
 
 #--------------------------------
 # LIBRARY SOURCES
 #--------------------------------
 
-LIB_SRC =  gnuplot_i.c
+LIB_SRC =   
 LIB_OBJ = $(LIB_SRC:.c=.o)
-EXECS = rythme
+EXECS = chromas
 
 all: $(EXECS)
 
-rythme : $(LIB_OBJ) $(LIB_SRC) rythme_work.c
-	$(CC) $(CFLAGS) $(LIB_OBJ) rythme_work.c -o $(EXECS) -lsndfile  -lvorbis -lvorbisenc -logg -lFLAC -lm -lfftw3
+chromas : $(LIB_OBJ) $(LIB_SRC) chromas.c
+	$(CC) $(CFLAGS) $(LIB_OBJ) chromas.c -o chromas -lsndfile  -lvorbis -lvorbisenc -logg -lFLAC -lm -lfftw3
 
-clean :
-	rm -f *.o *.wav
+clean : 
+	rm -f *.o 
 
 cleanall :
-	rm -f *.o *~ *.wav
+	rm -f *.o *~ 
+
