@@ -16,5 +16,3 @@ interface/window\.o
 bin/
 
 *.ppm
-
-main
