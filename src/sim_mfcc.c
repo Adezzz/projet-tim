@@ -18,18 +18,15 @@
 
 typedef struct mfcc {
   double data[MFCC_SIZE];
+} mfcc;
+
+
+
+static void print_usage (char *progname) {
+  printf ("\nUsage : %s <input wav file1> <input wav file2> \n", progname) ;
+	puts ("\n") ;
 }
-  mfcc;
 
-
-
-static void
-print_usage (char *progname)
-{	printf ("\nUsage : %s <input wav file1> <input wav file2> \n", progname) ;
-	puts ("\n"
-		) ;
-
-}
 static void
 fill_buffer(double *buffer, double *new_buffer)
 {
@@ -73,7 +70,7 @@ static int read_n_samples (SNDFILE * infile, double * buffer, int channels, int 
 
     } else {
       /* FORMAT ERROR */
-      printf ("Channel format error.\n");
+      printf ("ERREUR: nombre de canaux non-traitable.\n");
     }
   return 0;
 }
@@ -113,7 +110,7 @@ mfcc* fill_sequence(char* infilename, int *nb_frames) {
   SF_INFO	 	sfinfo ;
 
   if ((infile = sf_open (infilename, SFM_READ, &sfinfo)) == NULL) {
-      printf ("Not able to open input file %s.\n", infilename) ;
+      printf ("ERREUR: impossible d'ouvrir le fichier %s.\n", infilename) ;
       puts (sf_strerror (NULL)) ;
       return NULL ;
   }
@@ -128,14 +125,14 @@ mfcc* fill_sequence(char* infilename, int *nb_frames) {
       if (read_samples (infile, new_buffer, sfinfo.channels)==1)
 	      fill_buffer(buffer, new_buffer);
       else	{
-    	  printf("not enough samples !!\n");
+    	  printf("ERREUR: pas assez d'échantillons fournis.\n");
     	  return NULL;
 	    }
   }
 
-  printf("taille : %d échantillons \n", (int)sfinfo.frames);
+  printf("# Taille : %d échantillons \n", (int)sfinfo.frames);
   int seq_size = (int)ceil((double)sfinfo.frames/HOP_SIZE);
-  printf("nbre symboles : %d \n", seq_size);
+  printf("# Nombre de symboles : %d \n", seq_size);
 
   mfcc* sequence1 = malloc(sizeof(struct mfcc)*seq_size);
   assert(sequence1);
@@ -195,7 +192,7 @@ int main (int argc, char * argv [])
   mfcc * sequence2 = fill_sequence(infilename2, &nb_frames2);
 
   if (sequence2 == NULL || sequence1 == NULL) {
-      printf("erreur calcul sequence \n");
+      printf("ERREUR: calcul séquence.\n");
       return 1;
   }
 
@@ -221,7 +218,7 @@ int main (int argc, char * argv [])
     }
   }
 
-  printf("Similarité: %f\n", D);
+  printf("Distance entre les deux extraits: %f\n", D);
 
   //Creation d'une image PPM de la matrice
 
@@ -232,7 +229,7 @@ int main (int argc, char * argv [])
     }
   }
 
-  FILE *fp = fopen("matrix.ppm", "w+");
+  FILE *fp = fopen("sim_matrix.ppm", "w+");
   (void) fprintf(fp, "P2\n%d %d\n255\n", nb_frames1, nb_frames2);
   int color;
   for (int i = 0; i < nb_frames1; i++) {

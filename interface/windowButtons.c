@@ -1,94 +1,125 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
+#include <stdint.h>
 #include <stdbool.h>
-
+#include <stdio.h>
 
 typedef struct {
-  SDL_Rect draw_rect;    // dimensions of button
-  struct {
-    Uint8 r, g, b, a;
-  } colour;
+    SDL_Rect draw_rect;    // dimensions of button
+    struct {
+        Uint8 r, g, b, a;
+    } colour;
 
-  bool pressed;
+    bool pressed;
 } button_t;
 
 static void button_process_event(button_t *btn, const SDL_Event *ev) {
-  // react on mouse click within button rectangle by setting 'pressed'
-  if(ev->type == SDL_MOUSEBUTTONDOWN) {
-    if(ev->button.button == SDL_BUTTON_LEFT &&
-      ev->button.x >= btn->draw_rect.x &&
-      ev->button.x <= (btn->draw_rect.x + btn->draw_rect.w) &&
-      ev->button.y >= btn->draw_rect.y &&
-      ev->button.y <= (btn->draw_rect.y + btn->draw_rect.h)) {
-        btn->pressed = true;
-      }
+    // react on mouse click within button rectangle by setting 'pressed'
+    if(ev->type == SDL_MOUSEBUTTONDOWN) {
+        if(ev->button.button == SDL_BUTTON_LEFT &&
+                ev->button.x >= btn->draw_rect.x &&
+                ev->button.x <= (btn->draw_rect.x + btn->draw_rect.w) &&
+                ev->button.y >= btn->draw_rect.y &&
+                ev->button.y <= (btn->draw_rect.y + btn->draw_rect.h)) {
+            btn->pressed = true;
+        }
     }
-  }
+}
 
-  int main(int argc, char *argv[])
-  {
-    SDL_Surface *ecran = NULL;
-    SDL_Surface *bouton1 = NULL;
-    SDL_Surface *bouton2 = NULL;
-    SDL_Event event;
+static bool button(SDL_Renderer *r, button_t *btn) {
+    // draw button
+    SDL_SetRenderDrawColor(r, btn->colour.r, btn->colour.g, btn->colour.b, btn->colour.a);
+    SDL_RenderFillRect(r, &btn->draw_rect);
 
-    SDL_Rect position;
-    position.x = 640/2 - 75;
-    position.y = 480/2 - 20;
+    // if button press detected - reset it so it wouldn't trigger twice
+    if(btn->pressed) {
+        btn->pressed = false;
+        return true;
+    }
+    return false;
+}
 
-    if (SDL_Init(SDL_INIT_VIDEO) == -1) // Démarrage de la SDL. Si erreur :
-    {
-      fprintf(stderr, "Erreur d'initialisation de la SDL : %s\n", SDL_GetError()); // Écriture de l'erreur
-      exit(EXIT_FAILURE); // On quitte le programme
+
+void inputText(SDL_Renderer *r) {
+  SDL_Rect *rect;
+  rect->x = 0;
+  rect->y = 0;
+  rect->w = 32;
+  rect->h = 32;
+  SDL_SetRenderDrawColor(r, 0, 255, 255, 255);
+  SDL_RenderFillRect(r, rect); //changer la couleur
+}
+
+
+int main (int argc, char *argv[]){
+    int quit = 0;
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_Window* window = NULL;
+    window = SDL_CreateWindow("",350, 150, 800, 500,    SDL_WINDOW_SHOWN);
+    if (window == NULL){
+        fprintf(stderr, "create window failed: %s\n", SDL_GetError());
+        return 1;   // 'error' return status is !0. 1 is good enough
     }
 
-    SDL_WM_SetCaption("Analyse Audio", NULL);
-
-    ecran = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
-    if (ecran == NULL) // Si l'ouverture a échoué, on le note et on arrête
-    {
-      fprintf(stderr, "Impossible de charger le mode vidéo : %s\n", SDL_GetError());
-      exit(EXIT_FAILURE);
+    SDL_Renderer* renderer = NULL;
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if(!renderer) {   // renderer creation may fail too
+        fprintf(stderr, "create renderer failed: %s\n", SDL_GetError());
+        return 1;
     }
-    SDL_FillRect(ecran, NULL, SDL_MapRGB(ecran->format, 17, 206, 112)); //changer la couleur
 
-    //Buttons
+    SDL_Texture* txt = NULL;
+
+    SDL_Rect rct;
+    rct.x = 0 ;
+    rct.y = 0;
+    rct.h = 500;
+    rct.w = 800;
+
+    // button state - colour and rectangle
     button_t start_button = {
-      .colour = { .r = 255, .g = 255, .b = 255, .a = 255, },
-      .draw_rect = { .x = position.x, .y = position.y, .w = 150, .h = 40 },
+        .colour = { .r = 255, .g = 255, .b = 255, .a = 255, },
+        .draw_rect = { .x = 128, .y = 128, .w = 128, .h = 128 },
     };
-    bouton1 = SDL_CreateRGBSurface(SDL_HWSURFACE, start_button.draw_rect.w, start_button.draw_rect.h, 32, start_button.colour.r, start_button.colour.g, start_button.colour.b, start_button.colour.a);
-    SDL_FillRect(bouton1, NULL, SDL_MapRGB(ecran->format, start_button.colour.r, start_button.colour.g, start_button.colour.b));
-    SDL_BlitSurface(bouton1, NULL, ecran, &position);
 
-    bool quit = false;
+    enum {
+        STATE_IN_MENU,
+        STATE_IN_GAME,
+    } state = 0;
 
-    while(!quit)
-    {
-      SDL_WaitEvent(&event);
-      if(event.type == SDL_QUIT) {
-        quit = true;
-        break;
-      }
+    while(!quit) {
+        SDL_Event evt;    // no need for new/delete, stack is fine
 
-      button_process_event(&start_button, &event);
-      if (start_button.pressed  == true)
-      {
-        printf("Button1 pressed\n");
-        /* APPLY PROGRAM*/
-        start_button.colour.r = 0;
-        bouton1 = SDL_CreateRGBSurface(SDL_HWSURFACE, start_button.draw_rect.w, start_button.draw_rect.h, 32, start_button.colour.r, start_button.colour.g, start_button.colour.b, start_button.colour.a);
-        SDL_FillRect(bouton1, NULL, SDL_MapRGB(ecran->format, start_button.colour.r, start_button.colour.g, start_button.colour.b));
-        SDL_BlitSurface(bouton1, NULL, ecran, &position);
-        start_button.pressed = false;
-      }
-      SDL_Flip(ecran);
+        // event loop and draw loop are separate things, don't mix them
+        while(SDL_PollEvent(&evt)) {
+            // quit on close, window close, or 'escape' key hit
+            if(evt.type == SDL_QUIT ||
+                    (evt.type == SDL_WINDOWEVENT && evt.window.event == SDL_WINDOWEVENT_CLOSE) ||
+                    (evt.type == SDL_KEYDOWN && evt.key.keysym.sym == SDLK_ESCAPE)) {
+                quit = 1;
+            }
+
+            // pass event to button
+            button_process_event(&start_button, &evt);
+        }
+
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+
+//      SDL_RenderCopy(renderer, txt, NULL, &rct);
+
+        if(state == STATE_IN_MENU) {
+            if(button(renderer, &start_button)) {
+                printf("start button pressed\n");
+                state = STATE_IN_GAME;   // state change - button will not be drawn anymore
+                inputText(renderer);
+            }
+        } else if(state == STATE_IN_GAME) {
+            /* your game logic */
+        }
+
+        SDL_RenderPresent(renderer);
     }
-
-
-    SDL_FreeSurface(bouton1);
-    SDL_Quit();
-
-    return EXIT_SUCCESS;
-  }
+    SDL_DestroyWindow(window);
+    SDL_DestroyRenderer(renderer);
+    return 0;
+}

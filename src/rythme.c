@@ -186,7 +186,6 @@ int main (int argc, char * argv []) {
 
 	while (read_samples (infile, new_buffer, sfinfo.channels) == 1)	{
 
-		printf("Processing frame %d\n", nb_frames);
 		fill_buffer(buffer, new_buffer); /* hop size */
 
 		for (i = 0; i < FRAME_SIZE; i++) // fft input
@@ -223,9 +222,12 @@ int main (int argc, char * argv []) {
 		nb_frames++;
 	}
 
+	printf("\n***\n");
+	printf("%d fenêtres traitées.\n", nb_frames);
+
 	/* PLOT */
 	gnuplot_resetplot(h);
-	gnuplot_plot_x(h, spectralFlux, nb_frames, "Spectral Flux");
+	gnuplot_plot_x(h, spectralFlux, nb_frames, "Flux spectral");
 	sleep(2);
 
 	/* TEMPO ESTIMATION */
@@ -247,10 +249,10 @@ int main (int argc, char * argv []) {
 		}
 }
 
-	printf("Maximum autocorrelation = %d\n", imax);
-	printf("Frequency (Hz) = %f\n", 44100.0 / ((double)imax * HOP_SIZE));
-	printf("Period (s) = %f\n", (double)imax * HOP_SIZE / 44100.0);
-	printf("Tempo (BPM) = %f\n", 60.0 / ((double)imax * HOP_SIZE / 44100.0));
+	printf("# Autocorrelation maximale: %d\n", imax);
+	printf("# Fréquence (Hz): %f\n", 44100.0 / ((double)imax * HOP_SIZE));
+	printf("# Période (s): %f\n", (double)imax * HOP_SIZE / 44100.0);
+	printf("# Tempo (BPM): %f\n", 60.0 / ((double)imax * HOP_SIZE / 44100.0));
 
 
 	// Peigne (déphasage)
@@ -281,11 +283,9 @@ int main (int argc, char * argv []) {
 		}
 	}
 
-	printf("Max intercorrelation %d\n", comb_imax);
-
 	/* PLOT */
 	gnuplot_resetplot(h);
-	gnuplot_plot_x(h, gamma, nb_frames_in, "Comb");
+	gnuplot_plot_x(h, gamma, nb_frames_in, "Peigne");
 	sleep(2);
 	sf_close (infile);
 
@@ -293,13 +293,13 @@ int main (int argc, char * argv []) {
 	//Correcting the beats synthesized previously out of place
 
 	if ((infile = sf_open (infilename, SFM_READ, &sfinfo)) == NULL) {
-		printf ("ERROR: couldn't open input file.\n");
+		printf ("ERREUR: fichier impossible à ouvrir.\n");
 		perror("wrong_input");
 		return EXIT_FAILURE;
 	}
 
 	if ((outfile = sf_open (outfilename, SFM_WRITE, &sfinfo)) == NULL) {
-		printf ("ERROR: couldn't open input file.\n");
+		printf ("ERREUR: fichier impossible à ouvrir.\n");
 		perror("wrong_input");
 		return EXIT_FAILURE;
 	}
@@ -309,14 +309,14 @@ int main (int argc, char * argv []) {
 		if (read_samples (infile, new_buffer, sfinfo.channels) == 1) {
 			fill_buffer(buffer, new_buffer);
 		} else {
-			printf("ERROR: not enough samples provided.\n");
+			printf("ERREUR: pas assez d'échantillons fournis.\n");
 			perror("sample_lack");
 			return EXIT_FAILURE;
 		}
 	}
 
 	nb_frames = 0;
-	printf("Adjusting...\n");
+	printf("Ajustement...\n");
 	while (read_samples (infile, new_buffer, sfinfo.channels) == 1) {
 
 		fill_buffer(buffer, new_buffer);
@@ -333,7 +333,7 @@ int main (int argc, char * argv []) {
 		nb_frames++;
 	}
 
-	printf("Done.\n");
+	printf("Terminé.\n");
 	sf_close (infile);
 	sf_close (outfile);
 
