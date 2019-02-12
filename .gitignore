@@ -12,3 +12,9 @@ wave
 interface/window
 
 interface/window\.o
+
+bin/
+
+*.ppm
+
+main
