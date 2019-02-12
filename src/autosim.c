@@ -220,6 +220,28 @@ int main (int argc, char * argv [])
 
   printf("\n> Distance entre les deux extraits: %f\n", D);
 
+  //Creation d'une image PPM de la matrice
+
+  float distance[nb_frames1][nb_frames2];
+  for (int i = 0; i < nb_frames1; i++) {
+    for (int j = 0; j < nb_frames2; j++) {
+      distance[i][j] = cosine_distance(sequence1[i], sequence2[j]);
+    }
+  }
+
+  FILE *fp = fopen("sim_matrix.ppm", "w+");
+  (void) fprintf(fp, "P2\n%d %d\n255\n", nb_frames1, nb_frames2);
+  int color;
+  for (int i = 0; i < nb_frames1; i++) {
+    for (int j = 0; j < nb_frames2; j++) {
+      color = 255.0*(1.0 + distance[i][j])/2.0;
+      fprintf(fp, "%d ", color);
+    }
+    fprintf(fp, "\n");
+  }
+ (void) fclose(fp);
+
+
 
   if (!sequence1)
     free(sequence1);

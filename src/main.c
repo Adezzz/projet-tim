@@ -20,14 +20,19 @@ short check_ext(const char *str, const unsigned int size, const enum extension e
 int main(int argc, char *argv[]){
 
   printf("##################################\n");
-  printf("#### ANALYSE AUDIO\n");
+  printf("####       ANALYSE AUDIO      ####\n");
   printf("##################################\n");
-  printf("Entrer un numéro de commande:\n");
-  printf("1. Extraction de rythme.\n");
-  printf("2. Calcul de similarité (MFCC).\n");
-  printf("3. Estimation de la tonalité.\n");
+  printf("Entrez un numéro de commande:\n");
+  printf("1. Extraction de rythme (WAV).\n");
+  printf("2. Calcul de similarité avec coefficients MFCC (WAV).\n");
+  printf("3. Estimation de la tonalité (MIDI).\n");
+  printf("4. Affichage des informations audio (WAV).\n");
+  printf("5. Visualisation de matrice d'autosimilarité (WAV).\n");
+
+  printf("6. Quitter.\n");
 
   char choix = getchar();
+  int res;
   int num = choix - '0';
   char fichier[NB_CHAR];
   char fichier2[NB_CHAR];
@@ -37,29 +42,39 @@ int main(int argc, char *argv[]){
   switch (num) {
     case 1:
       printf("Chemin de l'extrait à analyser:\n");
-      scanf("%s", fichier);
+      if ((res=scanf("%s", fichier))<0)
+        return EXIT_FAILURE;
       ext = WAV;
       if (check_ext(fichier, strlen(fichier), ext) != 0) {
         printf("ERREUR: fichier WAV attendu.\n");
         return EXIT_FAILURE;
       }
 
-      strcpy(commande, "./rythme ");
+      strcpy(commande, "bin/rythme ");
       strncat(commande, fichier, 100);
       strcat(commande, " rythme_output.wav");
 
-      system(commande);
+      if ((res=system(commande)) == -1)
+        return EXIT_FAILURE;
       printf("Fichier créé: rythme_output.wav\n");
       break;
 
     case 2:
 
       printf("Chemin du premier extrait WAV à analyser:\n");
-      scanf("%s", fichier);
+      if ((res=scanf("%s", fichier))<0)
+        return EXIT_FAILURE;
       printf("Chemin du second extrait WAV à analyser:\n");
-      scanf("%s", fichier2);
+      if ((res=scanf("%s", fichier2))<0)
+        return EXIT_FAILURE;
 
-      strcpy(commande, "./similar ");
+      ext = WAV;
+      if (check_ext(fichier, strlen(fichier), ext) != 0 || check_ext(fichier2, strlen(fichier2), ext) != 0) {
+        printf("ERREUR: fichier WAV attendu.\n");
+        return EXIT_FAILURE;
+      }
+
+      strcpy(commande, "bin/similar ");
       strncat(commande, fichier, 100);
       strcat(commande, " ");
       strncat(commande, fichier2, 100);
@@ -68,13 +83,68 @@ int main(int argc, char *argv[]){
       printf("Comparaison des extraits...\n");
       printf("\n***\n");
 
-      system(commande);
-      printf("Fichier créé: rythme_output.wav\n");
+      if ((res=system(commande)) == -1)
+        return EXIT_FAILURE;
       break;
 
     case 3:
-      printf("\nVous avez choisi: %d\n", choix);
+      printf("Chemin de l'extrait à analyser:\n");
+      if ((res=scanf("%s", fichier))<0)
+        return EXIT_FAILURE;
+      ext = MIDI;
+      if (check_ext(fichier, strlen(fichier), ext) != 0) {
+        printf("ERREUR: fichier MIDI attendu.\n");
+        return EXIT_FAILURE;
+      }
+
+      strcpy(commande, "bin/ton ");
+      strncat(commande, fichier, 100);
+      printf("\n***\n");
+
+      if ((res=system(commande)) == -1)
+        return EXIT_FAILURE;
       break;
+
+
+    case 4:
+      printf("Chemin du premier extrait WAV à analyser:\n");
+      if ((res=scanf("%s", fichier))<0)
+        return EXIT_FAILURE;
+
+      strcpy(commande, "bin/info ");
+      strncat(commande, fichier, 100);
+
+      if ((res=system(commande)) == -1)
+        return EXIT_FAILURE;
+      break;
+
+    case 5:
+      printf("Chemin de l'extrait à analyser:\n");
+      if ((res=scanf("%s", fichier))<0)
+        return EXIT_FAILURE;
+      ext = WAV;
+      if (check_ext(fichier, strlen(fichier), ext) != 0) {
+        printf("ERREUR: fichier WAV attendu.\n");
+        return EXIT_FAILURE;
+      }
+
+      strcpy(commande, "bin/autocor ");
+      strncat(commande, fichier, 100);
+      strcat(commande, " ");
+      strncat(commande, fichier, 100);
+
+      if ((res=system(commande)) == -1)
+        return EXIT_FAILURE;
+      printf("Matrice de corrélation sauvegardée dans: sim_matrix.ppm\n");
+      if ((res=system("eog sim_matrix.ppm")) == -1)
+        return EXIT_FAILURE;
+      break;
+
+    case 6:
+      printf("Au revoir !\n");
+      exit(0);
+      break;
+
     default:
       printf("\nVeuillez entrer un nombre entre 1 et 3.\n");
       break;

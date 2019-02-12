@@ -113,11 +113,11 @@ void read_midi(char * midifile)
     }
 
   /* Profil de notes à afficher */
-  printf("Note: ");
+  printf("Numéro note: ");
   for (int i = 0; i < 12; i++) {
     printf("%d ", i);
   }
-   printf("\nOccu: ");
+   printf("\nOccurences : ");
   for (size_t i = 0; i < 12; i++) {
     printf("%d ", histogram[i]);
   }
@@ -125,9 +125,9 @@ void read_midi(char * midifile)
   /* Corrélation avec profils de référence */
 
   correlation(histogram, res, krumhansl_M, krumhansl_m);
-  printf("\nCorrelation krumhansl: %d, %d\n", res[0], res[1]);
+  printf("\n# Correlation Krumhansl: %d, %d\n", res[0], res[1]);
   correlation(histogram, res, temperley_M, temperley_m);
-  printf("Correlation temperley : %d, %d\n", res[0], res[1]);
+  printf("# Correlation Temperley : %d, %d\n", res[0], res[1]);
 
   /* Tonalité estimée à afficher */
 }

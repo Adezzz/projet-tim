@@ -12,7 +12,7 @@
   Unix. It compiles and works quite well on a number of Unix flavours as
   well as other operating systems. The following module enables sending
   display requests to gnuplot through simple C calls.
-  
+
 */
 /*--------------------------------------------------------------------------*/
 
@@ -78,7 +78,7 @@
   gnuplot_get_program_path("csh") returns "/usr/bin"
   gnuplot_get_program_path("/bin/ls") returns NULL
   @endverbatim
-  
+
  */
 /*-------------------------------------------------------------------------*/
 char * gnuplot_get_program_path(char * pname)
@@ -154,7 +154,7 @@ gnuplot_ctrl * gnuplot_init(void)
 		return NULL ;
 	}
 
-    /* 
+    /*
      * Structure initialization:
      */
     handle = (gnuplot_ctrl*)malloc(sizeof(gnuplot_ctrl)) ;
@@ -188,7 +188,7 @@ gnuplot_ctrl * gnuplot_init(void)
 void gnuplot_close(gnuplot_ctrl * handle)
 {
     int     i ;
-	
+
     if (pclose(handle->gnucmd) == -1) {
         fprintf(stderr, "problem closing communication to gnuplot\n") ;
         return ;
@@ -267,7 +267,7 @@ void gnuplot_cmd(gnuplot_ctrl *  handle, char *  cmd, ...)
  */
 /*--------------------------------------------------------------------------*/
 
-void gnuplot_setstyle(gnuplot_ctrl * h, char * plot_style) 
+void gnuplot_setstyle(gnuplot_ctrl * h, char * plot_style)
 {
     if (strcmp(plot_style, "lines") &&
         strcmp(plot_style, "points") &&
@@ -423,7 +423,8 @@ void gnuplot_plot_x(
     /* Write data to this file  */
     for (i=0 ; i<n ; i++) {
 		sprintf(line, "%g\n", d[i]);
-		write(tmpfd, line, strlen(line));
+		if (write(tmpfd, line, strlen(line)) == -1)
+      return;
     }
     close(tmpfd) ;
 
@@ -433,7 +434,7 @@ void gnuplot_plot_x(
     } else {
         strcpy(cmd, "plot") ;
     }
-    
+
     if (title == NULL) {
         sprintf(line, "%s \"%s\" with %s", cmd, name, handle->pstyle) ;
     } else {
@@ -518,7 +519,8 @@ void gnuplot_plot_xy(
     /* Write data to this file  */
     for (i=0 ; i<n; i++) {
         sprintf(line, "%g %g\n", x[i], y[i]) ;
-		write(tmpfd, line, strlen(line));
+		if(write(tmpfd, line, strlen(line)) == -1)
+      return;
     }
     close(tmpfd) ;
 
@@ -528,7 +530,7 @@ void gnuplot_plot_xy(
     } else {
         strcpy(cmd, "plot") ;
     }
-    
+
     if (title == NULL) {
         sprintf(line, "%s \"%s\" with %s", cmd, name, handle->pstyle) ;
     } else {
@@ -634,7 +636,7 @@ void gnuplot_plot_once(
   @endcode
  */
 /*--------------------------------------------------------------------------*/
-    
+
 
 void gnuplot_plot_slope(
     gnuplot_ctrl    *   handle,
@@ -711,7 +713,7 @@ void gnuplot_plot_equation(
         strcpy(plot_str, "plot") ;
     }
 
-    sprintf(cmd, "%s %s title \"%s\" with %s", 
+    sprintf(cmd, "%s %s title \"%s\" with %s",
                   plot_str, equation, title_str, h->pstyle) ;
     gnuplot_cmd(h, cmd) ;
     h->nplots++ ;
