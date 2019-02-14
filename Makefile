@@ -15,14 +15,11 @@ BIN_DIR = bin/
 LIB_SRC =  $(LIB_DIR)gnuplot_i.c
 LIB_SIMI =  $(LIB_DIR)mfcc.c $(LIB_DIR)filterbank.c
 LIB_OBJ = $(LIB_SRC:.c=.o)
-EXECS = wave ton rythme similar autocor info main
+EXECS = ton rythme similar autocor info main
 all: $(EXECS)
 
 main : $(SRC_DIR)main.c
 	$(CC) $(CFLAGS) $^ -o $@
-
-wave : $(LIB_OBJ) $(LIB_SRC) $(SRC_DIR)display_sound_wave.c
-	$(CC) $(CFLAGS) $(LIB_OBJ) $(SRC_DIR)display_sound_wave.c -o $(BIN_DIR)wave -lsndfile  -lvorbis -lvorbisenc -logg -lFLAC -lm -lfftw3
 
 ton :  $(LIB_DIR)midifile.c $(SRC_DIR)ton.c
 	$(CC) $^ -o $(BIN_DIR)$@
