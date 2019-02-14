@@ -1,18 +1,8 @@
 
 matrix\.ppm
 
-similar
-
-rythme
-
-ton
-
-wave
-
 interface/window
 
 interface/window\.o
-
-bin/
 
 *.ppm
